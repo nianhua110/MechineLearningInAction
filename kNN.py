@@ -5,6 +5,8 @@ Created on Thu Jul 28 15:40:31 2016
 @author: kyle
 """
 
+import matplotlib
+import matplotlib.pyplot as plt
 from numpy import *
 import operator
 
@@ -26,7 +28,38 @@ def classify0(inX, dataSet, labels, k):
         classCount[voteIlabel] = classCount.get(voteIlabel, 0) +1
     sortedClassCount =sorted(classCount.iteritems(), key =operator.itemgetter(1), reverse = True)
     return sortedClassCount[0][0]
+
+def file2matrix(filename):
+    fr = open(filename)
+    arrayOLines = fr.readlines()
+    numberOfLines = len(arrayOLines)
+    returnMat = zeros((numberOfLines, 3))
+    classLabelVector=[]
+    index = 0
+    for line in arrayOLines:
+        line = line.strip();
+        listFromLine = line.split('\t')
+        returnMat[index,:]=listFromLine[0:3]
+        classLabelVector.append(int(listFromLine[-1]))
+        index +=1
+    return returnMat, classLabelVector
     
+def autoNorm(dataSet):
+    minVals =dataSet.min(0)
+    maxVals = dataSet.max(0)
+    ranges = maxVals - minVals
+    normDataSet = zeros(shape(dataSet))
+    m = dataSet.shape[0]
+    normDataSet = dataSet - tile(minVals, (m,1))
+    normDataSet = normDataSet/tile(ranges, (m,1))
+    return normDataSet, ranges, minVals
+    
+
 if __name__ == '__main__':
     group, labels = createDataSet();
     result =  classify0([0,0], group, labels, 3)
+    datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')
+    fig = plt.figure()
+    ax =fig.add_subplot(111)
+    ax.scatter(datingDataMat[:,1], datingDataMat[:,2], 15.0*array(datingLabels), 15.0*array(datingLabels))
+    plt.show()
